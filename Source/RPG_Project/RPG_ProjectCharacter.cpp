@@ -67,11 +67,11 @@ void ARPG_ProjectCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	//PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	//PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAction("RunAndSheath", IE_Pressed, this, &ARPG_ProjectCharacter::OnRun);
 	PlayerInputComponent->BindAction("RunAndSheath", IE_Released, this, &ARPG_ProjectCharacter::OnWalk);
-
+	PlayerInputComponent->BindAction("DrawAndAttack", IE_Pressed, this, &ARPG_ProjectCharacter::DrawWeaponOrAttack);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ARPG_ProjectCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ARPG_ProjectCharacter::MoveRight);
@@ -100,6 +100,20 @@ void ARPG_ProjectCharacter::OnWalk() {
 	isRun = false;
 }
 
+void ARPG_ProjectCharacter::DrawWeaponOrAttack() {
+	if (playerJob->getJobName() == JobName::NONE) return;
+	switch (hasWeapon)
+	{
+	case true:
+		//Attack
+		break;
+	case false:
+		// DrawWeapon
+		isDraw = true;
+		GetCharacterMovement()->MaxWalkSpeed = 0.0f;
+		break;
+	}
+}
 
 void ARPG_ProjectCharacter::OnResetVR()
 {
@@ -180,6 +194,7 @@ void ARPG_ProjectCharacter::setJob(JobName job) {
 	{
 	case JobName::WARRIOR:
 		playerJob = NewObject<UWarrior>(this);
+		weaponComponentName = TEXT("Sword");
 		break;
 	case JobName::WIZARD:
 		break;
@@ -194,4 +209,20 @@ void ARPG_ProjectCharacter::setJob(JobName job) {
 void ARPG_ProjectCharacter::logJobName() {
 	FString tmp = UEnum::GetValueAsString(playerJob->getJobName());
 	UE_LOG(LogTemp, Log, TEXT("JobName : %s"), *tmp);
+}
+
+void ARPG_ProjectCharacter::CallAttach() {
+	AActor* weapon = Cast<AActor>(GetDefaultSubobjectByName(weaponComponentName));
+	
+	AttachActorToHand(weapon);
+	hasWeapon = true;
+	isDraw = false;
+}
+
+void ARPG_ProjectCharacter::AttachActorToHand(AActor* ActorToAttach) {
+	FName SocketName = FName(TEXT("WeaponSocket"));
+	if (ActorToAttach) {
+		UE_LOG(LogTemp, Log, TEXT("CallAttach"));
+		ActorToAttach->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale,SocketName);
+	}
 }

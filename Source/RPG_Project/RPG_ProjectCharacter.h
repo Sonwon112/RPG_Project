@@ -34,12 +34,17 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Job)
 	UJob* playerJob;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Job)
+	FName weaponComponentName = "none";
+
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = MovementSpeedValue)
-	float runSpeed = 1200.0f;
+	float runSpeed = 1000.0f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = MovementSpeedValue)
-	float walkSpeed = 600.0f;
+	float walkSpeed = 500.0f;
 
+	bool isDraw = false;
+	bool hasWeapon = false;
 
 protected:
 	bool isRun = false;
@@ -49,7 +54,7 @@ protected:
 	/** Resets HMD orientation in VR. */
 	void OnResetVR();
 	
-	/** Conver Speed*/
+	/** Convert Speed*/
 	void OnRun();
 	void OnWalk();
 
@@ -77,6 +82,9 @@ protected:
 	/** Handler for when a touch input stops. */
 	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
 	
+	void DrawWeaponOrAttack();
+
+
 	virtual void BeginPlay();
 
 protected:
@@ -93,5 +101,16 @@ public:
 	UFUNCTION(BlueprintCallable,Category="Job")
 	void setJob(JobName jobName);
 	void logJobName();
+
+	UFUNCTION(BlueprintCallable,Category="Weapon")
+	virtual void CallAttach();
+
+	UFUNCTION(BlueprintCallable,Category="Weapon")
+	void AttachActorToHand(AActor* ActorToAttach);
+	UFUNCTION(BlueprintCallable,Category="Weapon")
+	bool GetDrawState() { return isDraw; }
+	UFUNCTION(BlueprintCallable,Category="Weapon")
+	bool GetHasWeapon() { return hasWeapon; }
+	
 };
 
